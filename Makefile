@@ -11,4 +11,4 @@ all:
 .PHONY: clean
 clean:
 	make -C ${KERNRLDIR} M=${PWD} clean
-	# rm -rf *.o core .depend .*.cmd *.ko *.mod.c *.tmp_version *.mod *.order *.symvers
+	# rm -rf *.o *.o.d core .depend .*.cmd *.ko *.mod.c *.tmp_version *.mod *.order *.symvers
