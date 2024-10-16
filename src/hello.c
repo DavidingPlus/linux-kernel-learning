@@ -2,9 +2,12 @@
 #include <linux/module.h>
 
 
+int add(int a, int b);
+
+
 static int __init hello_init(void)
 {
-    printk(KERN_INFO "Hello Linux Kernel!\n");
+    printk(KERN_INFO "Hello Linux Kernel: %d\n", add(1, 2));
 
 
     return 0;
