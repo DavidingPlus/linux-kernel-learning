@@ -2,7 +2,7 @@
 #include <linux/module.h>
 
 
-int hello_init(void)
+static int __init hello_init(void)
 {
     printk(KERN_INFO "Hello Linux Kernel!\n");
 
@@ -10,7 +10,7 @@ int hello_init(void)
     return 0;
 }
 
-void hello_exit(void)
+static void __exit hello_exit(void)
 {
     printk(KERN_INFO "Goodbye Linux Kernel!\n");
 }
