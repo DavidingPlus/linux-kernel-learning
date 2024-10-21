@@ -1,6 +1,6 @@
 ifneq ($(KERNELRELEASE),)
 
-chrdev-objs := main.o 
+chrdev-objs := main.o file.o
 obj-m := chrdev.o
 
 
