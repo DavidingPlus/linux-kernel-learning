@@ -1,6 +1,8 @@
 #include <linux/init.h>
 #include <linux/module.h>
 
+#include "add.h"
+
 
 MODULE_VERSION("1.0.0");
 MODULE_LICENSE("Dual BSD/GPL");
@@ -8,12 +10,9 @@ MODULE_AUTHOR("DavidingPlus");
 MODULE_DESCRIPTION("A Simple Hello World Module");
 
 
-int add(int a, int b);
-
-
 static int __init hello_init(void)
 {
-    printk(KERN_INFO "Hello World %d\n", add(1, 2));
+    printk(KERN_INFO "hello: Hello World %d\n", add(1, 2));
 
 
     return 0;
@@ -21,7 +20,7 @@ static int __init hello_init(void)
 
 static void __exit hello_exit(void)
 {
-    printk(KERN_INFO "Goodbye World!\n");
+    printk(KERN_INFO "hello: Goodbye World\n");
 }
 
 
