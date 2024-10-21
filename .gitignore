@@ -1,6 +1,7 @@
 .vscode
 build/
 .xmake/
+.buildme
 
 # Makefile Build Artifacts
 *.o
