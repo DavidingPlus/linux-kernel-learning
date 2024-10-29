@@ -1,1 +1,1 @@
-add_executable (TemporaryTest main.cpp)
+add_executable (TemporaryTest main.c)
