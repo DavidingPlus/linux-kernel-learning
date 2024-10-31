@@ -1,4 +1,4 @@
-add_definitions ("-Wall")
+add_compile_options ("-Wall")
 
 
 add_executable (Attribute1 main1.c)
