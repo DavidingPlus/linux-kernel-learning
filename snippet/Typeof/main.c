@@ -20,7 +20,6 @@
         typeof(y) tempY = (y);                                               \
                                                                              \
         /* 这一行的目的是检查两个变量的类型是否一致。*/ \
-                                                                             \
         (void)(&tempX == &tempY);                                            \
                                                                              \
         tempX < tempY ? tempX : tempY;                                       \
