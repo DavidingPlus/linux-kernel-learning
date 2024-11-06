@@ -2,9 +2,9 @@
 #define _CALC_H_
 
 
-extern int add(int a, int b);
+int add(int a, int b);
 
-extern int sub(int a, int b);
+int sub(int a, int b);
 
 
 #endif
