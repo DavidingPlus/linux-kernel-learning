@@ -1,16 +1,18 @@
 #ifndef _MAIN_H_
 #define _MAIN_H_
 
+#include <linux/types.h>
 
-struct globalmem_dev_t
+
+struct LGlobalMemDataT
 {
-    struct cdev *cdev;
+    struct cdev *m_cdev;
 
-    dev_t devNumber;
+    dev_t m_devNumber;
 
-    int devCount;
+    int m_devCount;
 
-    const char *devName;
+    const char *m_devName;
 };
 
 

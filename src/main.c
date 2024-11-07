@@ -22,17 +22,17 @@ struct file_operations globalmem_fops = {
     .read = globalmem_read,
 };
 
-struct globalmem_dev_t globalmem_dev = {
-    .cdev = NULL,
-    .devNumber = 0,
-    .devCount = 1,
-    .devName = "globalmem",
+struct LGlobalMemDataT globalmemData = {
+    .m_cdev = NULL,
+    .m_devNumber = 0,
+    .m_devCount = 1,
+    .m_devName = "globalmem",
 };
 
 
 static int __init globalmem_init(void)
 {
-    int res = alloc_chrdev_region(&globalmem_dev.devNumber, 0, globalmem_dev.devCount, globalmem_dev.devName);
+    int res = alloc_chrdev_region(&globalmemData.m_devNumber, 0, globalmemData.m_devCount, globalmemData.m_devName);
 
     if (res < 0)
     {
@@ -42,8 +42,8 @@ static int __init globalmem_init(void)
         return res;
     }
 
-    globalmem_dev.cdev = cdev_alloc();
-    if (!globalmem_dev.cdev)
+    globalmemData.m_cdev = cdev_alloc();
+    if (!globalmemData.m_cdev)
     {
         printk(KERN_ALERT "globalmem: cdev_alloc() failed.\n");
 
@@ -51,9 +51,9 @@ static int __init globalmem_init(void)
         return -EFAULT;
     }
 
-    cdev_init(globalmem_dev.cdev, &globalmem_fops);
+    cdev_init(globalmemData.m_cdev, &globalmem_fops);
 
-    res = cdev_add(globalmem_dev.cdev, globalmem_dev.devNumber, globalmem_dev.devCount);
+    res = cdev_add(globalmemData.m_cdev, globalmemData.m_devNumber, globalmemData.m_devCount);
     if (res < 0)
     {
         printk(KERN_ALERT "globalmem: cdev_add() failed.\n");
@@ -71,9 +71,9 @@ static int __init globalmem_init(void)
 
 static void __exit globalmem_exit(void)
 {
-    cdev_del(globalmem_dev.cdev);
+    cdev_del(globalmemData.m_cdev);
 
-    unregister_chrdev_region(globalmem_dev.devNumber, globalmem_dev.devCount);
+    unregister_chrdev_region(globalmemData.m_devNumber, globalmemData.m_devCount);
 
 
     printk(KERN_INFO "globalmem: globalmem exit!\n");
