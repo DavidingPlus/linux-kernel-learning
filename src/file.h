@@ -4,7 +4,7 @@
 #include <linux/fs.h>
 
 
-#define MAX_BUF_SIZE 64
+#define MAX_SIZE 64
 
 
 int chrdev_open(struct inode *, struct file *);

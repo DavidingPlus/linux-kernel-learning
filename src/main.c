@@ -12,26 +12,16 @@ MODULE_AUTHOR("DavidingPlus");
 MODULE_DESCRIPTION("A Simple ChrDev Module");
 
 
-struct file_operations chrdev_ops = {
-    .owner = THIS_MODULE,
-    .open = chrdev_open,
-    .release = chrdev_release,
-    .write = chrdev_write,
-    .read = chrdev_read,
-};
-
-
-#define DEV_COUNT 1
-
-
-dev_t devNumber = 0;
-
-struct cdev chrdev;
+extern struct file_operations chrdev_fops;
+extern dev_t devNumber;
+extern int devCount;
+extern struct cdev *cdev;
+extern const char *devName;
 
 
 static int __init chrdev_init(void)
 {
-    int res = alloc_chrdev_region(&devNumber, 0, DEV_COUNT, "chrdev");
+    int res = alloc_chrdev_region(&devNumber, 0, devCount, devName);
 
     if (res < 0)
     {
@@ -41,10 +31,18 @@ static int __init chrdev_init(void)
         return res;
     }
 
+    cdev = cdev_alloc();
+    if (!cdev)
+    {
+        printk(KERN_ALERT "chrdev: cdev_alloc() failed.\n");
 
-    cdev_init(&chrdev, &chrdev_ops);
 
-    res = cdev_add(&chrdev, devNumber, DEV_COUNT);
+        return -EFAULT;
+    }
+
+    cdev_init(cdev, &chrdev_fops);
+
+    res = cdev_add(cdev, devNumber, devCount);
     if (res < 0)
     {
         printk(KERN_ALERT "chrdev: cdev_add() failed.\n");
@@ -62,9 +60,9 @@ static int __init chrdev_init(void)
 
 static void __exit chrdev_exit(void)
 {
-    cdev_del(&chrdev);
+    cdev_del(cdev);
 
-    unregister_chrdev_region(devNumber, DEV_COUNT);
+    unregister_chrdev_region(devNumber, devCount);
 
 
     printk(KERN_INFO "chrdev: chrdev exit!\n");

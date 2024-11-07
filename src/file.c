@@ -3,6 +3,9 @@
 #include <linux/uaccess.h>
 
 
+char kernelStr[MAX_SIZE] = {0};
+
+
 int chrdev_open(struct inode *inode, struct file *filp)
 {
     printk(KERN_INFO "chrdev: driver chrdev open.\n");
@@ -19,17 +22,13 @@ int chrdev_release(struct inode *inode, struct file *filp)
     return 0;
 }
 
-
-char kernelBuf[MAX_BUF_SIZE] = {0};
-
-
 ssize_t chrdev_write(struct file *filp, const char __user *buf, size_t count, loff_t *offp)
 {
-    if (count > MAX_BUF_SIZE - 1) return -ENOMEM;
+    if (count > MAX_SIZE - 1) return -ENOMEM;
     if (count < 0) return -EINVAL;
 
 
-    if (0 != copy_from_user(kernelBuf, buf, count))
+    if (0 != copy_from_user(kernelStr, buf, count))
     {
         printk(KERN_INFO "chrdev: copy_from_user() failed.\n");
 
@@ -37,7 +36,7 @@ ssize_t chrdev_write(struct file *filp, const char __user *buf, size_t count, lo
         return -EFAULT;
     }
 
-    printk(KERN_INFO "chrdev: driver chrdev write: %s\n", kernelBuf);
+    printk(KERN_INFO "chrdev: driver chrdev write: %s\n", kernelStr);
 
 
     return (ssize_t)count;
@@ -45,11 +44,11 @@ ssize_t chrdev_write(struct file *filp, const char __user *buf, size_t count, lo
 
 ssize_t chrdev_read(struct file *filp, char __user *buf, size_t count, loff_t *offp)
 {
-    if (count > MAX_BUF_SIZE - 1) return -ENOMEM;
+    if (count > MAX_SIZE - 1) return -ENOMEM;
     if (count < 0) return -EINVAL;
 
 
-    if (0 != copy_to_user(buf, kernelBuf, count))
+    if (0 != copy_to_user(buf, kernelStr, count))
     {
         printk(KERN_INFO "chrdev: copy_to_user() failed.\n");
 
@@ -57,7 +56,7 @@ ssize_t chrdev_read(struct file *filp, char __user *buf, size_t count, loff_t *o
         return -EFAULT;
     }
 
-    printk(KERN_INFO "chrdev: driver chrdev read: %s\n", kernelBuf);
+    printk(KERN_INFO "chrdev: driver chrdev read: %s\n", kernelStr);
 
 
     return (ssize_t)count;

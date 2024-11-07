@@ -16,15 +16,15 @@ int main()
         return -1;
     }
 
-    char s[] = "hello linux kernel";
+    char readStr[] = "hello linux kernel";
 
-    int len = strlen(s);
+    int len = strlen(readStr);
 
-    write(fd, s, len);
-    memset(s, '\0', len);
-    read(fd, s, len);
+    write(fd, readStr, len);
+    memset(readStr, '\0', len);
+    read(fd, readStr, len);
 
-    std::cout << "readBuf is: " << s << std::endl;
+    std::cout << "readStr is: " << readStr << std::endl;
 
 
     return 0;
