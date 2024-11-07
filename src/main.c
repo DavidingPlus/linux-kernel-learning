@@ -1,10 +1,11 @@
+#include "main.h"
+
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/fs.h>
 #include <linux/cdev.h>
 
 #include "fops.h"
-#include "main.h"
 
 
 MODULE_VERSION("1.0.0");
