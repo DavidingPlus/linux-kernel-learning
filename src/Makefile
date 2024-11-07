@@ -1,7 +1,7 @@
 ifneq ($(KERNELRELEASE),)
 
-chrdev-objs := main.o file.o
-obj-m := chrdev.o
+globalmem-objs := main.o file.o variable.o
+obj-m := globalmem.o
 
 
 else

@@ -7,7 +7,7 @@
 
 int main()
 {
-    int fd = open("/dev/chrdev", O_RDWR);
+    int fd = open("/dev/globalmem", O_RDWR);
     if (-1 == fd)
     {
         perror("open");
@@ -16,7 +16,7 @@ int main()
         return -1;
     }
 
-    char readStr[] = "hello linux kernel";
+    char readStr[] = "hello linux kernel.";
 
     int len = strlen(readStr);
 

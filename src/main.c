@@ -9,23 +9,23 @@
 MODULE_VERSION("1.0.0");
 MODULE_LICENSE("Dual BSD/GPL");
 MODULE_AUTHOR("DavidingPlus");
-MODULE_DESCRIPTION("A Simple ChrDev Module");
+MODULE_DESCRIPTION("A Simple GlobalMem Module");
 
 
-extern struct file_operations chrdev_fops;
+extern struct file_operations globalmem_fops;
 extern dev_t devNumber;
 extern int devCount;
 extern struct cdev *cdev;
 extern const char *devName;
 
 
-static int __init chrdev_init(void)
+static int __init globalmem_init(void)
 {
     int res = alloc_chrdev_region(&devNumber, 0, devCount, devName);
 
     if (res < 0)
     {
-        printk(KERN_ALERT "chrdev: register_chrdev_region() failed.\n");
+        printk(KERN_ALERT "globalmem: register_globalmem_region() failed.\n");
 
 
         return res;
@@ -34,40 +34,40 @@ static int __init chrdev_init(void)
     cdev = cdev_alloc();
     if (!cdev)
     {
-        printk(KERN_ALERT "chrdev: cdev_alloc() failed.\n");
+        printk(KERN_ALERT "globalmem: cdev_alloc() failed.\n");
 
 
         return -EFAULT;
     }
 
-    cdev_init(cdev, &chrdev_fops);
+    cdev_init(cdev, &globalmem_fops);
 
     res = cdev_add(cdev, devNumber, devCount);
     if (res < 0)
     {
-        printk(KERN_ALERT "chrdev: cdev_add() failed.\n");
+        printk(KERN_ALERT "globalmem: cdev_add() failed.\n");
 
 
         return res;
     }
 
 
-    printk(KERN_INFO "chrdev: chrdev init!\n");
+    printk(KERN_INFO "globalmem: globalmem init!\n");
 
 
     return 0;
 }
 
-static void __exit chrdev_exit(void)
+static void __exit globalmem_exit(void)
 {
     cdev_del(cdev);
 
     unregister_chrdev_region(devNumber, devCount);
 
 
-    printk(KERN_INFO "chrdev: chrdev exit!\n");
+    printk(KERN_INFO "globalmem: globalmem exit!\n");
 }
 
 
-module_init(chrdev_init);
-module_exit(chrdev_exit);
+module_init(globalmem_init);
+module_exit(globalmem_exit);

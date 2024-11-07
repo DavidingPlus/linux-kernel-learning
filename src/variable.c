@@ -4,12 +4,12 @@
 #include "file.h"
 
 
-struct file_operations chrdev_fops = {
+struct file_operations globalmem_fops = {
     .owner = THIS_MODULE,
-    .open = chrdev_open,
-    .release = chrdev_release,
-    .write = chrdev_write,
-    .read = chrdev_read,
+    .open = globalmem_open,
+    .release = globalmem_release,
+    .write = globalmem_write,
+    .read = globalmem_read,
 };
 
 
@@ -19,4 +19,4 @@ int devCount = 1;
 
 struct cdev *cdev = NULL;
 
-const char *devName = "chrdev";
+const char *devName = "globalmem";
