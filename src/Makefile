@@ -1,6 +1,6 @@
 ifneq ($(KERNELRELEASE),)
 
-globalmem-objs := main.o file.o variable.o
+globalmem-objs := main.o fops.o
 obj-m := globalmem.o
 
 

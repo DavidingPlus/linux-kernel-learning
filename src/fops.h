@@ -1,5 +1,5 @@
-#ifndef _FILE_H_
-#define _FILE_H_
+#ifndef _FOPS_H_
+#define _FOPS_H_
 
 #include <linux/fs.h>
 

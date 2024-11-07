@@ -3,7 +3,8 @@
 #include <linux/fs.h>
 #include <linux/cdev.h>
 
-#include "file.h"
+#include "fops.h"
+#include "main.h"
 
 
 MODULE_VERSION("1.0.0");
@@ -12,16 +13,25 @@ MODULE_AUTHOR("DavidingPlus");
 MODULE_DESCRIPTION("A Simple GlobalMem Module");
 
 
-extern struct file_operations globalmem_fops;
-extern dev_t devNumber;
-extern int devCount;
-extern struct cdev *cdev;
-extern const char *devName;
+struct file_operations globalmem_fops = {
+    .owner = THIS_MODULE,
+    .open = globalmem_open,
+    .release = globalmem_release,
+    .write = globalmem_write,
+    .read = globalmem_read,
+};
+
+struct globalmem_dev_t globalmem_dev = {
+    .cdev = NULL,
+    .devNumber = 0,
+    .devCount = 1,
+    .devName = "globalmem",
+};
 
 
 static int __init globalmem_init(void)
 {
-    int res = alloc_chrdev_region(&devNumber, 0, devCount, devName);
+    int res = alloc_chrdev_region(&globalmem_dev.devNumber, 0, globalmem_dev.devCount, globalmem_dev.devName);
 
     if (res < 0)
     {
@@ -31,8 +41,8 @@ static int __init globalmem_init(void)
         return res;
     }
 
-    cdev = cdev_alloc();
-    if (!cdev)
+    globalmem_dev.cdev = cdev_alloc();
+    if (!globalmem_dev.cdev)
     {
         printk(KERN_ALERT "globalmem: cdev_alloc() failed.\n");
 
@@ -40,9 +50,9 @@ static int __init globalmem_init(void)
         return -EFAULT;
     }
 
-    cdev_init(cdev, &globalmem_fops);
+    cdev_init(globalmem_dev.cdev, &globalmem_fops);
 
-    res = cdev_add(cdev, devNumber, devCount);
+    res = cdev_add(globalmem_dev.cdev, globalmem_dev.devNumber, globalmem_dev.devCount);
     if (res < 0)
     {
         printk(KERN_ALERT "globalmem: cdev_add() failed.\n");
@@ -60,9 +70,9 @@ static int __init globalmem_init(void)
 
 static void __exit globalmem_exit(void)
 {
-    cdev_del(cdev);
+    cdev_del(globalmem_dev.cdev);
 
-    unregister_chrdev_region(devNumber, devCount);
+    unregister_chrdev_region(globalmem_dev.devNumber, globalmem_dev.devCount);
 
 
     printk(KERN_INFO "globalmem: globalmem exit!\n");
