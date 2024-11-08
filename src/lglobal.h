@@ -1,5 +1,5 @@
-#ifndef _MAIN_H_
-#define _MAIN_H_
+#ifndef _LGLOBAL_H_
+#define _LGLOBAL_H_
 
 #include <linux/types.h>
 

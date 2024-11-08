@@ -1,8 +1,8 @@
-#include "fops.h"
+#include "lfops.h"
 
 #include <linux/uaccess.h>
 
-#include "main.h"
+#include "lglobal.h"
 
 
 extern struct LGlobalMemDataT globalmemData;
@@ -10,6 +10,9 @@ extern struct LGlobalMemDataT globalmemData;
 
 int globalmem_open(struct inode *inode, struct file *filp)
 {
+    // 为了练习，使用文件私有数据。
+    filp->private_data = globalmemData.m_mem;
+
     printk(KERN_INFO "globalmem: driver globalmem open.\n");
 
 
@@ -27,13 +30,16 @@ int globalmem_release(struct inode *inode, struct file *filp)
 // TODO 修改读写逻辑，兼顾 offp 文件偏移指针。
 ssize_t globalmem_read(struct file *filp, char __user *buf, size_t count, loff_t *offp)
 {
+    // ISO C90 禁止混合声明和代码。在 C99 标准之前，所有声明都必须位于块中的任何语句之前。
+    unsigned char *mem = (unsigned char *)filp->private_data;
+
     if (count > GLOBALMEM_SIZE - 1) return -ENOMEM;
     if (count < 0) return -EINVAL;
 
     // 对内核空间访问用户空间数据的合法性检测，保证传入数据的确属于用户空间。
     if (0 == access_ok(buf, count)) return -EFAULT;
 
-    if (copy_to_user(buf, globalmemData.m_mem, count))
+    if (copy_to_user(buf, mem, count))
     {
         printk(KERN_INFO "globalmem: copy_to_user() failed.\n");
 
@@ -41,7 +47,7 @@ ssize_t globalmem_read(struct file *filp, char __user *buf, size_t count, loff_t
         return -EFAULT;
     }
 
-    printk(KERN_INFO "globalmem: driver globalmem read: %s\n", globalmemData.m_mem);
+    printk(KERN_INFO "globalmem: driver globalmem read: %s\n", mem);
 
 
     return (ssize_t)count;
@@ -49,12 +55,14 @@ ssize_t globalmem_read(struct file *filp, char __user *buf, size_t count, loff_t
 
 ssize_t globalmem_write(struct file *filp, const char __user *buf, size_t count, loff_t *offp)
 {
+    unsigned char *mem = (unsigned char *)filp->private_data;
+
     if (count > GLOBALMEM_SIZE - 1) return -ENOMEM;
     if (count < 0) return -EINVAL;
 
     if (0 == access_ok(buf, count)) return -EFAULT;
 
-    if (copy_from_user(globalmemData.m_mem, buf, count))
+    if (copy_from_user(mem, buf, count))
     {
         printk(KERN_INFO "globalmem: copy_from_user() failed.\n");
 
@@ -62,7 +70,7 @@ ssize_t globalmem_write(struct file *filp, const char __user *buf, size_t count,
         return -EFAULT;
     }
 
-    printk(KERN_INFO "globalmem: driver globalmem write: %s\n", globalmemData.m_mem);
+    printk(KERN_INFO "globalmem: driver globalmem write: %s\n", mem);
 
 
     return (ssize_t)count;
@@ -74,7 +82,7 @@ loff_t globalemem_llseek(struct file *filp, loff_t offset, int orig)
     return (loff_t)0;
 }
 
-long globalmem_unlocked_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+long globalmem_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 {
     return (long)0;
 }

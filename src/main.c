@@ -1,11 +1,10 @@
-#include "main.h"
-
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/fs.h>
 #include <linux/cdev.h>
 
-#include "fops.h"
+#include "lfops.h"
+#include "lglobal.h"
 
 
 MODULE_VERSION("1.0.0");
@@ -14,21 +13,8 @@ MODULE_AUTHOR("DavidingPlus");
 MODULE_DESCRIPTION("A Simple GlobalMem Module");
 
 
-struct file_operations globalmem_fops = {
-    .owner = THIS_MODULE,
-    .open = globalmem_open,
-    .release = globalmem_release,
-    .write = globalmem_write,
-    .read = globalmem_read,
-};
-
-struct LGlobalMemDataT globalmemData = {
-    .m_cdev = NULL,
-    .m_devNumber = 0,
-    .m_devCount = 1,
-    .m_devName = "globalmem",
-    .m_mem = {0},
-};
+extern struct file_operations globalmemFops;
+extern struct LGlobalMemDataT globalmemData;
 
 
 static int __init globalmem_init(void)
@@ -52,7 +38,7 @@ static int __init globalmem_init(void)
         return -EFAULT;
     }
 
-    cdev_init(globalmemData.m_cdev, &globalmem_fops);
+    cdev_init(globalmemData.m_cdev, &globalmemFops);
 
     res = cdev_add(globalmemData.m_cdev, globalmemData.m_devNumber, globalmemData.m_devCount);
     if (res < 0)
