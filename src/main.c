@@ -27,6 +27,7 @@ struct LGlobalMemDataT globalmemData = {
     .m_devNumber = 0,
     .m_devCount = 1,
     .m_devName = "globalmem",
+    .m_mem = {0},
 };
 
 
