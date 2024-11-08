@@ -16,12 +16,16 @@ int main()
         return -1;
     }
 
-    char readStr[] = "hello linux kernel.";
+    char readStr[] = "hello globalmem module.";
 
     int len = strlen(readStr);
 
     write(fd, readStr, len);
-    memset(readStr, '\0', len);
+
+    // 如果不重置文件偏移指针，就读，那读出来包是空的。
+    lseek(fd, 0, SEEK_SET);
+
+    bzero(readStr, sizeof(readStr));
     read(fd, readStr, len);
 
     std::cout << "readStr is: " << readStr << std::endl;

@@ -10,8 +10,8 @@ struct file_operations globalmemFops = {
     .owner = THIS_MODULE,
     .open = globalmem_open,
     .release = globalmem_release,
-    .write = globalmem_write,
     .read = globalmem_read,
+    .write = globalmem_write,
     .llseek = globalemem_llseek,
     .unlocked_ioctl = globalmem_ioctl,
 };
