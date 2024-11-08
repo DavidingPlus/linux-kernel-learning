@@ -1,7 +1,7 @@
 #include <linux/init.h>
 #include <linux/module.h>
 
-#include "calc.h"
+#include "lcalc.h"
 
 
 MODULE_VERSION("1.0.0");

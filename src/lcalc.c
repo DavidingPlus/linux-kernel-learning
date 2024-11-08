@@ -1,6 +1,6 @@
-#include <linux/export.h>
+#include "lcalc.h"
 
-#include "calc.h"
+#include <linux/export.h>
 
 
 int add(int a, int b) { return a + b; }
