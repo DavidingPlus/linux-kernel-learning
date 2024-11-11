@@ -50,7 +50,7 @@ ssize_t globalmem_read(struct file *filp, char __user *buf, size_t count, loff_t
         return -EFAULT;
     }
 
-    // 读取成功修改文件偏移指针
+    // 读取成功修改文件偏移指针。
     *offp += count;
 
     printk(KERN_INFO "globalmem: globalmem_read(): %s\n", mem + offset);
@@ -119,8 +119,27 @@ loff_t globalemem_llseek(struct file *filp, loff_t offset, int orig)
     return filp->f_pos;
 }
 
-// TODO
 long globalmem_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 {
-    return (long)0;
+    unsigned char *mem = (unsigned char *)filp->private_data;
+
+    // 目前仅支持 MEM_CLEAR 清空操作。
+    switch (cmd)
+    {
+        case MEM_CLEAR:
+        {
+            memset(mem, 0, GLOBALMEM_SIZE);
+
+            printk("globalmem: globalmem_ioctl(): MEM_CLEAR %d\n", MEM_CLEAR);
+
+            break;
+        }
+
+        default:
+            return -EINVAL;
+            break;
+    }
+
+
+    return 0;
 }
