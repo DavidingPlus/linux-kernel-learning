@@ -8,10 +8,10 @@
 extern struct LGlobalMemDataT globalmemData;
 
 
-int globalmem_open(struct inode *inode, struct file *filp)
+int globalmem_open(struct inode *pInode, struct file *pFile)
 {
     // 为了练习，使用文件私有数据。
-    filp->private_data = globalmemData.m_mem;
+    pFile->private_data = &globalmemData;
 
     printk(KERN_INFO "globalmem: globalmem_open()\n");
 
@@ -19,7 +19,7 @@ int globalmem_open(struct inode *inode, struct file *filp)
     return 0;
 }
 
-int globalmem_release(struct inode *inode, struct file *filp)
+int globalmem_release(struct inode *pInode, struct file *pFile)
 {
     printk(KERN_INFO "globalmem: globalmem_release()\n");
 
@@ -27,11 +27,11 @@ int globalmem_release(struct inode *inode, struct file *filp)
     return 0;
 }
 
-ssize_t globalmem_read(struct file *filp, char __user *buf, size_t count, loff_t *offp)
+ssize_t globalmem_read(struct file *pFile, char __user *pBuf, size_t count, loff_t *pOffset)
 {
     // ISO C90 禁止混合声明和代码。在 C99 标准之前，所有声明都必须位于块中的任何语句之前。
-    unsigned char *mem = (unsigned char *)filp->private_data;
-    unsigned long offset = (unsigned long)*offp;
+    struct LGlobalMemDataT *pGlobalMemData = (struct LGlobalMemDataT *)pFile->private_data;
+    unsigned long offset = (unsigned long)*pOffset;
 
 
     // 如果偏移量 >= mem 的大小 GLOBALMEM_SIZE，表示已经读到末尾了。
@@ -39,10 +39,13 @@ ssize_t globalmem_read(struct file *filp, char __user *buf, size_t count, loff_t
     // 如果 mem 剩余的大小不足 count，调整 count 大小，保证读到末尾。
     if (GLOBALMEM_SIZE - offset < count) count = GLOBALMEM_SIZE - offset;
 
-    // 对内核空间访问用户空间数据的合法性检测，保证传入数据的确属于用户空间。
-    if (0 == access_ok(buf, count)) return -EFAULT;
+    // 使用 copy_to_user() 函数，可能导致阻塞，因此不能使用自旋锁，应使用互斥体。
+    mutex_lock(&pGlobalMemData->m_mtx);
 
-    if (copy_to_user(buf, mem + offset, count))
+    // 对内核空间访问用户空间数据的合法性检测，保证传入数据的确属于用户空间。
+    if (0 == access_ok(pBuf, count)) return -EFAULT;
+
+    if (copy_to_user(pBuf, pGlobalMemData->m_mem + offset, count))
     {
         printk(KERN_INFO "globalmem: copy_to_user() failed.\n");
 
@@ -51,26 +54,30 @@ ssize_t globalmem_read(struct file *filp, char __user *buf, size_t count, loff_t
     }
 
     // 读取成功修改文件偏移指针。
-    *offp += count;
+    *pOffset += count;
 
-    printk(KERN_INFO "globalmem: globalmem_read(): %s\n", mem + offset);
+    mutex_unlock(&pGlobalMemData->m_mtx);
+
+    printk(KERN_INFO "globalmem: globalmem_read(): %s\n", pGlobalMemData->m_mem + offset);
 
 
     return (ssize_t)count;
 }
 
-ssize_t globalmem_write(struct file *filp, const char __user *buf, size_t count, loff_t *offp)
+ssize_t globalmem_write(struct file *pFile, const char __user *pBuf, size_t count, loff_t *pOffset)
 {
-    unsigned char *mem = (unsigned char *)filp->private_data;
-    unsigned long offset = (unsigned long)*offp;
+    struct LGlobalMemDataT *pGlobalMemData = (struct LGlobalMemDataT *)pFile->private_data;
+    unsigned long offset = (unsigned long)*pOffset;
 
 
     if (offset >= GLOBALMEM_SIZE) return 0;
     if (GLOBALMEM_SIZE - offset < count) count = GLOBALMEM_SIZE - offset;
 
-    if (0 == access_ok(buf, count)) return -EFAULT;
+    mutex_lock(&pGlobalMemData->m_mtx);
 
-    if (copy_from_user(mem + offset, buf, count))
+    if (0 == access_ok(pBuf, count)) return -EFAULT;
+
+    if (copy_from_user(pGlobalMemData->m_mem + offset, pBuf, count))
     {
         printk(KERN_INFO "globalmem: copy_from_user() failed.\n");
 
@@ -78,15 +85,17 @@ ssize_t globalmem_write(struct file *filp, const char __user *buf, size_t count,
         return -EFAULT;
     }
 
-    *offp += count;
+    *pOffset += count;
 
-    printk(KERN_INFO "globalmem: globalmem_write(): %s\n", mem + offset);
+    mutex_unlock(&pGlobalMemData->m_mtx);
+
+    printk(KERN_INFO "globalmem: globalmem_write(): %s\n", pGlobalMemData->m_mem + offset);
 
 
     return (ssize_t)count;
 }
 
-loff_t globalemem_llseek(struct file *filp, loff_t offset, int orig)
+loff_t globalemem_llseek(struct file *pFile, loff_t offset, int orig)
 {
     loff_t base;
 
@@ -97,7 +106,7 @@ loff_t globalemem_llseek(struct file *filp, loff_t offset, int orig)
             break;
 
         case SEEK_CUR:
-            base = filp->f_pos;
+            base = pFile->f_pos;
             break;
 
         case SEEK_END:
@@ -111,24 +120,28 @@ loff_t globalemem_llseek(struct file *filp, loff_t offset, int orig)
 
     if (base + offset < 0 || base + offset >= GLOBALMEM_SIZE) return -EINVAL;
 
-    filp->f_pos = base + offset;
+    pFile->f_pos = base + offset;
 
-    printk(KERN_INFO "globalmem: globalemem_llseek(): %lld\n", filp->f_pos);
+    printk(KERN_INFO "globalmem: globalemem_llseek(): %lld\n", pFile->f_pos);
 
 
-    return filp->f_pos;
+    return pFile->f_pos;
 }
 
-long globalmem_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+long globalmem_ioctl(struct file *pFile, unsigned int cmd, unsigned long arg)
 {
-    unsigned char *mem = (unsigned char *)filp->private_data;
+    struct LGlobalMemDataT *pGlobalMemData = (struct LGlobalMemDataT *)pFile->private_data;
 
     // 目前仅支持 MEM_CLEAR 清空操作。
     switch (cmd)
     {
         case MEM_CLEAR:
         {
-            memset(mem, 0, GLOBALMEM_SIZE);
+            mutex_lock(&pGlobalMemData->m_mtx);
+
+            memset(pGlobalMemData->m_mem, 0, GLOBALMEM_SIZE);
+
+            mutex_unlock(&pGlobalMemData->m_mtx);
 
             printk("globalmem: globalmem_ioctl(): MEM_CLEAR %d\n", MEM_CLEAR);
 

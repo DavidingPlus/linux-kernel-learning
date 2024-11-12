@@ -49,6 +49,9 @@ static int __init globalmem_init(void)
         return res;
     }
 
+    // 初始化互斥体
+    // Linux 内核优化了自旋锁、信号量、互斥体、完成量等的管理，不需要显式销毁。在数据结构生命周期结束时自动释放。
+    mutex_init(&globalmemData.m_mtx);
 
     printk(KERN_INFO "globalmem: globalmem init!\n");
 
@@ -61,7 +64,6 @@ static void __exit globalmem_exit(void)
     cdev_del(globalmemData.m_cdev);
 
     unregister_chrdev_region(globalmemData.m_devNumber, globalmemData.m_devCount);
-
 
     printk(KERN_INFO "globalmem: globalmem exit!\n");
 }

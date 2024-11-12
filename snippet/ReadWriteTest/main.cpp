@@ -23,12 +23,12 @@ int main()
     write(fd, readStr, len);
 
     // 如果不重置文件偏移指针，就读，那读出来包是空的。
-    lseek(fd, 0, SEEK_SET);
+    lseek(fd, 1, SEEK_SET);
 
     bzero(readStr, sizeof(readStr));
     read(fd, readStr, len);
 
-    std::cout << "readStr is: " << readStr << std::endl;
+    std::cout << "readStr is: " << readStr << std::endl; // ello globalmem module.
 
 
     return 0;

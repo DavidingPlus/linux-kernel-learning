@@ -30,8 +30,8 @@ int main()
     ioctl(fd, MEM_CLEAR);
 
     std::cout << "MEM_CLEAR: " << MEM_CLEAR << std::endl;
-    std::cout << "MEM_CLEAR's type: " << (char)_IOC_TYPE(MEM_CLEAR) << std::endl;
-    std::cout << "MEM_CLEAR's nr: " << _IOC_NR(MEM_CLEAR) << std::endl;
+    std::cout << "MEM_CLEAR's type: " << (char)_IOC_TYPE(MEM_CLEAR) << std::endl; // c
+    std::cout << "MEM_CLEAR's nr: " << _IOC_NR(MEM_CLEAR) << std::endl;           // 0
 
 
     lseek(fd, 0, SEEK_SET);

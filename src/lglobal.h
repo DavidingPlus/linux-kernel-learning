@@ -3,6 +3,7 @@
 
 #include <linux/types.h>
 #include <linux/ioctl.h>
+#include <linux/mutex.h>
 
 
 #define GLOBALMEM_SIZE 0x1000
@@ -20,6 +21,8 @@ struct LGlobalMemDataT
     const char *m_devName;
 
     unsigned char m_mem[GLOBALMEM_SIZE];
+
+    struct mutex m_mtx;
 };
 
 
