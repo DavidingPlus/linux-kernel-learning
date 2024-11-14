@@ -66,6 +66,10 @@ static int __init globalfifo_init(void)
     // Linux 内核优化了自旋锁、信号量、互斥体、完成量等的管理，不需要显式销毁。在数据结构生命周期结束时自动释放。
     mutex_init(&globalfifoData.m_mtx);
 
+    // 初始化等待队列头部
+    init_waitqueue_head(&globalfifoData.m_readWaitQueueHead);
+    init_waitqueue_head(&globalfifoData.m_writeWaitQueueHead);
+
     printk(KERN_INFO "globalfifo: globalfifo init!\n");
 
 

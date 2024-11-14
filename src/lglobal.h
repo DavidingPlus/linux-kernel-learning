@@ -13,6 +13,7 @@
 #include <linux/types.h>
 #include <linux/ioctl.h>
 #include <linux/mutex.h>
+#include <linux/wait.h>
 
 
 /**
@@ -44,7 +45,7 @@ struct LGlobalFifoDataT
     /**
      * @brief 需注册的设备的个数。
      */
-    int m_devCount;
+    unsigned int m_devCount;
 
     /**
      * @brief 设备名。
@@ -60,6 +61,21 @@ struct LGlobalFifoDataT
      * @brief 互斥体。
      */
     struct mutex m_mtx;
+
+    /**
+     * @brief 读操作的等待队列头部。
+     */
+    wait_queue_head_t m_readWaitQueueHead;
+
+    /**
+     * @brief 写操作的等待队列头部。
+     */
+    wait_queue_head_t m_writeWaitQueueHead;
+
+    /**
+     * @brief 当前全局内存的有效数据的长度。
+     */
+    unsigned int m_currentLen;
 };
 
 

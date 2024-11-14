@@ -31,4 +31,5 @@ struct LGlobalFifoDataT globalfifoData = {
     .m_devCount = 1,
     .m_devName = "globalfifo",
     .m_mem = {0},
+    .m_currentLen = 0,
 };
