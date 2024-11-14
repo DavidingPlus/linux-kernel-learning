@@ -18,7 +18,7 @@
 /**
  * @brief 全局内存的大小。
  */
-#define GLOBALMEM_SIZE 0x1000
+#define GLOBALFIFO_SIZE 0x1000
 
 /**
  * @brief 清空全局内存，用于 ioctal() 的 I/O 控制命令。
@@ -29,7 +29,7 @@
 /**
  * @brief 全局内存的数据结构体类型。
  */
-struct LGlobalMemDataT
+struct LGlobalFifoDataT
 {
     /**
      * @brief 描述字符设备的 cdev 结构体指针。
@@ -54,7 +54,7 @@ struct LGlobalMemDataT
     /**
      * @brief 全局内存数组。
      */
-    unsigned char m_mem[GLOBALMEM_SIZE];
+    unsigned char m_mem[GLOBALFIFO_SIZE];
 
     /**
      * @brief 互斥体。
