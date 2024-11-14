@@ -1,3 +1,12 @@
+/**
+ * @file main.c
+ * @author DavidingPlus (davidingplus@qq.com)
+ * @brief 驱动入口程序文件。
+ *
+ * Copyright (c) 2024 电子科技大学 刘治学
+ *
+ */
+
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/fs.h>
@@ -19,6 +28,7 @@ extern struct LGlobalMemDataT globalmemData;
 
 static int __init globalmem_init(void)
 {
+    // 申请设备号
     int res = alloc_chrdev_region(&globalmemData.m_devNumber, 0, globalmemData.m_devCount, globalmemData.m_devName);
 
     if (res < 0)
@@ -29,6 +39,7 @@ static int __init globalmem_init(void)
         return res;
     }
 
+    // 动态申请 cdev 内存
     globalmemData.m_cdev = cdev_alloc();
     if (!globalmemData.m_cdev)
     {
@@ -38,8 +49,10 @@ static int __init globalmem_init(void)
         return -EFAULT;
     }
 
+    // 初始化 cdev 成员
     cdev_init(globalmemData.m_cdev, &globalmemFops);
 
+    // 添加 cdev 设备
     res = cdev_add(globalmemData.m_cdev, globalmemData.m_devNumber, globalmemData.m_devCount);
     if (res < 0)
     {
@@ -61,8 +74,10 @@ static int __init globalmem_init(void)
 
 static void __exit globalmem_exit(void)
 {
+    // 删除 cdev 设备
     cdev_del(globalmemData.m_cdev);
 
+    // 释放设备号
     unregister_chrdev_region(globalmemData.m_devNumber, globalmemData.m_devCount);
 
     printk(KERN_INFO "globalmem: globalmem exit!\n");
