@@ -21,7 +21,6 @@ struct file_operations globalfifoFops = {
     .release = globalfifo_release,
     .read = globalfifo_read,
     .write = globalfifo_write,
-    .llseek = globalemem_llseek,
     .unlocked_ioctl = globalfifo_ioctl,
 };
 

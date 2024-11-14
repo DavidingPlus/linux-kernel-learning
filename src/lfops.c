@@ -41,8 +41,8 @@ ssize_t globalfifo_read(struct file *pFile, char __user *pBuf, size_t count, lof
     // ISO C90 禁止混合声明和代码。在 C99 标准之前，所有声明都必须位于块中的任何语句之前。
     ssize_t res = 0;
     struct LGlobalFifoDataT *pGlobalFifoData = (struct LGlobalFifoDataT *)pFile->private_data;
-    unsigned long offset = (unsigned long)*pOffset;
-    DECLARE_WAITQUEUE(wait, current); // 定义等待队列元素。
+    // 定义等待队列元素。
+    DECLARE_WAITQUEUE(wait, current);
 
 
     // 使用 copy_to_user() 函数，可能导致阻塞，因此不能使用自旋锁，应使用互斥体。
@@ -64,8 +64,8 @@ ssize_t globalfifo_read(struct file *pFile, char __user *pBuf, size_t count, lof
 
         // 阻塞的话改变进程状态。
         __set_current_state(TASK_INTERRUPTIBLE);
-        mutex_unlock(&pGlobalFifoData->m_mtx); // 调度其他进程之前解锁。
-
+        // 调度其他进程之前解锁。
+        mutex_unlock(&pGlobalFifoData->m_mtx);
         // 处理好以后调度其他进程。
         schedule();
 
@@ -73,48 +73,38 @@ ssize_t globalfifo_read(struct file *pFile, char __user *pBuf, size_t count, lof
         if (signal_pending(current))
         {
             res = -ERESTARTSYS;
-
-            goto out2; // 单独设置一个 out2 是因为这里不需要再次释放互斥体了。
+            // 单独设置一个 out2 是因为这里不需要再次释放互斥体了。
+            goto out2;
         }
 
-        mutex_lock(&pGlobalFifoData->m_mtx); // 重新加回锁。
+        // 重新加回锁。
+        mutex_lock(&pGlobalFifoData->m_mtx);
     }
 
-    // 如果偏移量 >= mem 的大小 GLOBALFIFO_SIZE，表示已经读到末尾了。
-    if (offset >= GLOBALFIFO_SIZE)
+    // 如果想要读的 count 大于 currentLen，调整 count。
+    if (count > pGlobalFifoData->m_currentLen) count = pGlobalFifoData->m_currentLen;
+
+    // copy_to_user() 和 copy_from_user() 包含 access_ok() 的检测，此处省去显式检测。
+    if (copy_to_user(pBuf, pGlobalFifoData->m_mem, count))
     {
-        res = 0;
-
-        goto out;
-    }
-
-    // 如果 mem 剩余的大小不足 count，调整 count 大小，保证读到末尾。
-    if (GLOBALFIFO_SIZE - offset < count) count = GLOBALFIFO_SIZE - offset;
-
-    // 对内核空间访问用户空间数据的合法性检测，保证传入数据的确属于用户空间。
-    if (0 == access_ok(pBuf, count))
-    {
-        printk(KERN_INFO "globalfifo: access_ok() check failed.\n");
-
         res = -EFAULT;
 
-        goto out;
-    }
-
-    if (copy_to_user(pBuf, pGlobalFifoData->m_mem + offset, count))
-    {
         printk(KERN_INFO "globalfifo: copy_to_user() failed.\n");
-
-        res = -EFAULT;
 
         goto out;
     }
     else
     {
         // 读取成功，修改数据。
-        // TODO
+        memcpy(pGlobalFifoData->m_mem, pGlobalFifoData->m_mem + count, pGlobalFifoData->m_currentLen - count);
 
-        printk(KERN_INFO "globalfifo: globalfifo_read(): %s\n", pGlobalFifoData->m_mem + offset);
+        pGlobalFifoData->m_currentLen -= count;
+        res = count;
+
+        // 除此之外，还要唤醒写等待队列的进程。
+        wake_up_interruptible(&pGlobalFifoData->m_writeWaitQueueHead);
+
+        printk(KERN_INFO "globalfifo: globalfifo_read(): read %ld bytes, currentLen: %d\n", count, pGlobalFifoData->m_currentLen);
     }
 
 
@@ -129,43 +119,73 @@ out2:
     return res;
 }
 
+// 写的过程完全类似，根据管道的语义画个示意图就明白了。
 ssize_t globalfifo_write(struct file *pFile, const char __user *pBuf, size_t count, loff_t *pOffset)
 {
-    // TODO
-}
+    ssize_t res = 0;
+    struct LGlobalFifoDataT *pGlobalFifoData = (struct LGlobalFifoDataT *)pFile->private_data;
+    DECLARE_WAITQUEUE(wait, current);
 
-loff_t globalemem_llseek(struct file *pFile, loff_t offset, int orig)
-{
-    loff_t base;
 
-    // orig 即用户层中的 whence 起始位置。
-    switch (orig)
+    mutex_lock(&pGlobalFifoData->m_mtx);
+
+    add_wait_queue(&pGlobalFifoData->m_writeWaitQueueHead, &wait);
+
+    while (pGlobalFifoData->m_currentLen == GLOBALFIFO_SIZE)
     {
-        case SEEK_SET:
-            base = 0;
-            break;
+        if (pFile->f_flags & O_NONBLOCK)
+        {
+            res = -EAGAIN;
 
-        case SEEK_CUR:
-            base = pFile->f_pos;
-            break;
+            goto out;
+        }
 
-        case SEEK_END:
-            base = GLOBALFIFO_SIZE;
-            break;
+        __set_current_state(TASK_INTERRUPTIBLE);
 
-        default:
-            return -EINVAL;
-            break;
+        mutex_unlock(&pGlobalFifoData->m_mtx);
+
+        schedule();
+
+        if (signal_pending(current))
+        {
+            res = -ERESTARTSYS;
+
+            goto out2;
+        }
+
+        mutex_lock(&pGlobalFifoData->m_mtx);
     }
 
-    if (base + offset < 0 || base + offset >= GLOBALFIFO_SIZE) return -EINVAL;
+    if (count > GLOBALFIFO_SIZE - pGlobalFifoData->m_currentLen) count = GLOBALFIFO_SIZE - pGlobalFifoData->m_currentLen;
 
-    pFile->f_pos = base + offset;
+    if (copy_from_user(pGlobalFifoData->m_mem + pGlobalFifoData->m_currentLen, pBuf, count))
+    {
+        res = -EFAULT;
 
-    printk(KERN_INFO "globalfifo: globalemem_llseek(): %lld\n", pFile->f_pos);
+        printk(KERN_INFO "globalfifo: copy_from_user() failed.\n");
+
+        goto out;
+    }
+    else
+    {
+        pGlobalFifoData->m_currentLen += count;
+        res = count;
+
+        wake_up_interruptible(&pGlobalFifoData->m_readWaitQueueHead);
+
+        printk(KERN_INFO "globalfifo: globalfifo_write(): write %ld bytes, currentLen: %d\n", count, pGlobalFifoData->m_currentLen);
+    }
 
 
-    return pFile->f_pos;
+out:
+    mutex_unlock(&pGlobalFifoData->m_mtx);
+
+out2:
+    remove_wait_queue(&pGlobalFifoData->m_writeWaitQueueHead, &wait);
+    __set_current_state(TASK_RUNNING);
+
+
+    return res;
 }
 
 long globalfifo_ioctl(struct file *pFile, unsigned int cmd, unsigned long arg)
