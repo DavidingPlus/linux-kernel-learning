@@ -6,11 +6,11 @@
 #include <linux/mutex.h>
 
 
-#define GLOBALMEM_SIZE 0x1000
+#define GLOBALFIFO_SIZE 0x1000
 #define MEM_CLEAR _IO('c', 0)
 
 
-struct LGlobalMemDataT
+struct LGlobalFifoDataT
 {
     struct cdev *m_cdev;
 
@@ -20,7 +20,7 @@ struct LGlobalMemDataT
 
     const char *m_devName;
 
-    unsigned char m_mem[GLOBALMEM_SIZE];
+    unsigned char m_mem[GLOBALFIFO_SIZE];
 
     struct mutex m_mtx;
 };

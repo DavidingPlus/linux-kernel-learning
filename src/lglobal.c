@@ -6,20 +6,20 @@
 #include "lfops.h"
 
 
-struct file_operations globalmemFops = {
+struct file_operations globalfifoFops = {
     .owner = THIS_MODULE,
-    .open = globalmem_open,
-    .release = globalmem_release,
-    .read = globalmem_read,
-    .write = globalmem_write,
+    .open = globalfifo_open,
+    .release = globalfifo_release,
+    .read = globalfifo_read,
+    .write = globalfifo_write,
     .llseek = globalemem_llseek,
-    .unlocked_ioctl = globalmem_ioctl,
+    .unlocked_ioctl = globalfifo_ioctl,
 };
 
-struct LGlobalMemDataT globalmemData = {
+struct LGlobalFifoDataT globalfifoData = {
     .m_cdev = NULL,
     .m_devNumber = 0,
     .m_devCount = 1,
-    .m_devName = "globalmem",
+    .m_devName = "globalfifo",
     .m_mem = {0},
 };

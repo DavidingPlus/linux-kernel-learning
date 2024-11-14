@@ -11,7 +11,7 @@
 
 int main()
 {
-    int fd = open("/dev/globalmem", O_RDWR);
+    int fd = open("/dev/globalfifo", O_RDWR);
     if (-1 == fd)
     {
         perror("open");
@@ -20,13 +20,13 @@ int main()
         return -1;
     }
 
-    char readStr[] = "hello globalmem module.";
+    char readStr[] = "hello globalfifo module.";
 
     int len = strlen(readStr);
 
     write(fd, readStr, len);
 
-    // 使用 ioctl() 清空 globalmem 的内存数据。
+    // 使用 ioctl() 清空 globalfifo 的内存数据。
     ioctl(fd, MEM_CLEAR);
 
     std::cout << "MEM_CLEAR: " << MEM_CLEAR << std::endl;
