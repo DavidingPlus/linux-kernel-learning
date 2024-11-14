@@ -22,6 +22,7 @@ struct file_operations globalfifoFops = {
     .read = globalfifo_read,
     .write = globalfifo_write,
     .unlocked_ioctl = globalfifo_ioctl,
+    .poll = globalfifo_poll,
 };
 
 struct LGlobalFifoDataT globalfifoData = {

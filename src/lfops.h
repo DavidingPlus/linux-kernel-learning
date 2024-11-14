@@ -25,13 +25,13 @@ int globalfifo_release(struct inode *, struct file *);
 
 /**
  * @brief 注册 read() 函数。
- * @details 读的语义是：每次从 globalinfo 的 mem 中从头开始读取 count 个字节，读取完毕后将读取的数据拿掉。如果 count > currentLen，则调整读取的字节为 currentLen。
+ * @details 读的语义是：每次从 globalfifo 的 mem 中从头开始读取 count 个字节，读取完毕后将读取的数据拿掉。如果 count > currentLen，则调整读取的字节为 currentLen。
  */
 ssize_t globalfifo_read(struct file *, char __user *, size_t, loff_t *);
 
 /**
  * @brief 注册 write() 函数。
- * @details 写的语义是：每次将 count 字节的数据写到 globalinfo 的 mem 末尾。如果超出内存数组大小，则多余的数据无法写入，即调整写入的字节为 GLOBALINFO_SIZE - currentLen。
+ * @details 写的语义是：每次将 count 字节的数据写到 globalfifo 的 mem 末尾。如果超出内存数组大小，则多余的数据无法写入，即调整写入的字节为 GLOBALFIFO_SIZE - currentLen。
  */
 ssize_t globalfifo_write(struct file *, const char __user *, size_t, loff_t *);
 
@@ -45,6 +45,12 @@ ssize_t globalfifo_write(struct file *, const char __user *, size_t, loff_t *);
  * @brief 注册 unlocked_ioctl() 函数。
  */
 long globalfifo_ioctl(struct file *, unsigned int, unsigned long);
+
+/**
+ * @brief 注册 poll() 函数。
+ *
+ */
+__poll_t globalfifo_poll(struct file *, struct poll_table_struct *);
 
 
 #endif

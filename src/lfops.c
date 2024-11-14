@@ -10,6 +10,7 @@
 #include "lfops.h"
 
 #include <linux/uaccess.h>
+#include <linux/poll.h>
 
 #include "lglobal.h"
 
@@ -215,4 +216,25 @@ long globalfifo_ioctl(struct file *pFile, unsigned int cmd, unsigned long arg)
 
 
     return 0;
+}
+
+__poll_t globalfifo_poll(struct file *pFile, struct poll_table_struct *pWait)
+{
+    __poll_t mask = 0;
+    struct LGlobalFifoDataT *pGlobalFifoData = pFile->private_data;
+
+    mutex_lock(&pGlobalFifoData->m_mtx);
+
+    // 第一次调用，将进程加入等待队列。
+    poll_wait(pFile, &pGlobalFifoData->m_readWaitQueueHead, pWait);
+    poll_wait(pFile, &pGlobalFifoData->m_writeWaitQueueHead, pWait);
+
+    // 第二次调用，如果满足条件，则返回 mask。
+    if (0 != pGlobalFifoData->m_currentLen) mask |= POLLIN | POLLRDNORM;
+    if (GLOBALFIFO_SIZE != pGlobalFifoData->m_currentLen) mask |= POLLOUT | POLLWRNORM;
+
+    mutex_unlock(&pGlobalFifoData->m_mtx);
+
+
+    return mask;
 }
