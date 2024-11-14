@@ -1,3 +1,12 @@
+/**
+ * @file lfops.c
+ * @author DavidingPlus (davidingplus@qq.com)
+ * @brief 向文件系统注册的回调函数的源文件。
+ *
+ * Copyright (c) 2024 电子科技大学 刘治学
+ *
+ */
+
 #include "lfops.h"
 
 #include <linux/uaccess.h>
@@ -99,6 +108,7 @@ loff_t globalemem_llseek(struct file *pFile, loff_t offset, int orig)
 {
     loff_t base;
 
+    // orig 即用户层中的 whence 起始位置。
     switch (orig)
     {
         case SEEK_SET:

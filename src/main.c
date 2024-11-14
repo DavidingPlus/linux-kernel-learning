@@ -1,3 +1,12 @@
+/**
+ * @file main.c
+ * @author DavidingPlus (davidingplus@qq.com)
+ * @brief 驱动入口程序文件。
+ *
+ * Copyright (c) 2024 电子科技大学 刘治学
+ *
+ */
+
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/fs.h>
@@ -19,7 +28,8 @@ extern struct LGlobalFifoDataT globalfifoData;
 
 static int __init globalfifo_init(void)
 {
-    int res = alloc_chrdev_region(&globalfifoData.m_devNumber, 0, globalfifoData.m_devCount, globalfifoData.m_devName);
+    // 申请设备号
+    int res = alloc_chrdev_region(&globalmemData.m_devNumber, 0, globalmemData.m_devCount, globalmemData.m_devName);
 
     if (res < 0)
     {
@@ -29,8 +39,9 @@ static int __init globalfifo_init(void)
         return res;
     }
 
-    globalfifoData.m_cdev = cdev_alloc();
-    if (!globalfifoData.m_cdev)
+    // 动态申请 cdev 内存
+    globalmemData.m_cdev = cdev_alloc();
+    if (!globalmemData.m_cdev)
     {
         printk(KERN_ALERT "globalfifo: cdev_alloc() failed.\n");
 
@@ -38,9 +49,11 @@ static int __init globalfifo_init(void)
         return -EFAULT;
     }
 
-    cdev_init(globalfifoData.m_cdev, &globalfifoFops);
+    // 初始化 cdev 成员
+    cdev_init(globalmemData.m_cdev, &globalmemFops);
 
-    res = cdev_add(globalfifoData.m_cdev, globalfifoData.m_devNumber, globalfifoData.m_devCount);
+    // 添加 cdev 设备
+    res = cdev_add(globalmemData.m_cdev, globalmemData.m_devNumber, globalmemData.m_devCount);
     if (res < 0)
     {
         printk(KERN_ALERT "globalfifo: cdev_add() failed.\n");
@@ -61,9 +74,11 @@ static int __init globalfifo_init(void)
 
 static void __exit globalfifo_exit(void)
 {
-    cdev_del(globalfifoData.m_cdev);
+    // 删除 cdev 设备
+    cdev_del(globalmemData.m_cdev);
 
-    unregister_chrdev_region(globalfifoData.m_devNumber, globalfifoData.m_devCount);
+    // 释放设备号
+    unregister_chrdev_region(globalmemData.m_devNumber, globalmemData.m_devCount);
 
     printk(KERN_INFO "globalfifo: globalfifo exit!\n");
 }
