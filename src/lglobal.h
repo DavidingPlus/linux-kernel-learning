@@ -24,7 +24,7 @@
 /**
  * @brief 清空全局内存，用于 ioctal() 的 I/O 控制命令。
  */
-#define MEM_CLEAR _IO('c', 0)
+#define FIFO_CLEAR _IO('c', 0)
 
 
 /**

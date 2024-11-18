@@ -193,10 +193,10 @@ long globalfifo_ioctl(struct file *pFile, unsigned int cmd, unsigned long arg)
 {
     struct LGlobalFifoDataT *pGlobalFifoData = (struct LGlobalFifoDataT *)pFile->private_data;
 
-    // 目前仅支持 MEM_CLEAR 清空操作。
+    // 目前仅支持 FIFO_CLEAR 清空操作。
     switch (cmd)
     {
-        case MEM_CLEAR:
+        case FIFO_CLEAR:
         {
             mutex_lock(&pGlobalFifoData->m_mtx);
 
@@ -204,7 +204,7 @@ long globalfifo_ioctl(struct file *pFile, unsigned int cmd, unsigned long arg)
 
             mutex_unlock(&pGlobalFifoData->m_mtx);
 
-            printk("globalfifo: globalfifo_ioctl(): MEM_CLEAR %d\n", MEM_CLEAR);
+            printk("globalfifo: globalfifo_ioctl(): FIFO_CLEAR %d\n", FIFO_CLEAR);
 
             break;
         }

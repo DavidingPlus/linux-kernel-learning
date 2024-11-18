@@ -6,7 +6,7 @@
 #include <sys/ioctl.h>
 
 
-#define MEM_CLEAR _IO('c', 0)
+#define FIFO_CLEAR _IO('c', 0)
 
 
 int main()
@@ -27,11 +27,11 @@ int main()
     write(fd, readStr, len);
 
     // 使用 ioctl() 清空 globalfifo 的内存数据。
-    ioctl(fd, MEM_CLEAR);
+    ioctl(fd, FIFO_CLEAR);
 
-    std::cout << "MEM_CLEAR: " << MEM_CLEAR << std::endl;
-    std::cout << "MEM_CLEAR's type: " << (char)_IOC_TYPE(MEM_CLEAR) << std::endl; // c
-    std::cout << "MEM_CLEAR's nr: " << _IOC_NR(MEM_CLEAR) << std::endl;           // 0
+    std::cout << "FIFO_CLEAR: " << FIFO_CLEAR << std::endl;
+    std::cout << "FIFO_CLEAR's type: " << (char)_IOC_TYPE(FIFO_CLEAR) << std::endl; // c
+    std::cout << "FIFO_CLEAR's nr: " << _IOC_NR(FIFO_CLEAR) << std::endl;           // 0
 
 
     lseek(fd, 0, SEEK_SET);
