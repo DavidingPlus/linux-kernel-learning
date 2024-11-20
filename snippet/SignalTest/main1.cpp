@@ -8,7 +8,7 @@
 #define MAX_SIZE BUFSIZ
 
 
-void doIt(int num)
+void doIt(int sigNum)
 {
     char data[MAX_SIZE] = {0};
 
@@ -29,8 +29,7 @@ int main()
 
     sigaction(SIGIO, &act, nullptr);
 
-    // 下面代码的含义是让当前进程设置为接受 SIGIO 信号，并且告诉内核是通过异步的方式接受。在这个程序中异步的感观不明显，但确实是这样用的。
-    // TODO 想办法让其感观明显一点
+    // TODO 下面代码的含义是让当前进程设置为接受 SIGIO 信号，并且告诉内核是通过异步的方式接受。在这个程序中异步的感观不明显，但确实是这样用的。想办法让其感观明显一点。
 
     // 设置将接收 SIGIO 和 SIGURG 信号的进程 id 或进程组 id
     fcntl(STDIN_FILENO, F_SETOWN, getpid());

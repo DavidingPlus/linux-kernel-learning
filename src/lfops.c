@@ -11,6 +11,7 @@
 
 #include <linux/uaccess.h>
 #include <linux/poll.h>
+#include <uapi/asm-generic/siginfo.h>
 
 #include "lglobal.h"
 
@@ -31,6 +32,9 @@ int globalfifo_open(struct inode *pInode, struct file *pFile)
 
 int globalfifo_release(struct inode *pInode, struct file *pFile)
 {
+    // 将文件从异步通知队列中删除。
+    globalfifo_fasync(-1, pFile, 0);
+
     printk(KERN_INFO "globalfifo: globalfifo_release()\n");
 
 
@@ -105,6 +109,14 @@ ssize_t globalfifo_read(struct file *pFile, char __user *pBuf, size_t count, lof
         // 除此之外，还要唤醒写等待队列的进程。
         wake_up_interruptible(&pGlobalFifoData->m_writeWaitQueueHead);
 
+        // 产生异步可写信号。
+        if (pGlobalFifoData->m_fasync)
+        {
+            kill_fasync(&pGlobalFifoData->m_fasync, SIGIO, POLL_OUT);
+
+            printk(KERN_INFO "globalfifo: %s() kill SIGIO\n", __func__);
+        }
+
         printk(KERN_INFO "globalfifo: globalfifo_read(): read %ld bytes, currentLen: %d\n", count, pGlobalFifoData->m_currentLen);
     }
 
@@ -174,6 +186,13 @@ ssize_t globalfifo_write(struct file *pFile, const char __user *pBuf, size_t cou
 
         wake_up_interruptible(&pGlobalFifoData->m_readWaitQueueHead);
 
+        if (pGlobalFifoData->m_fasync)
+        {
+            kill_fasync(&pGlobalFifoData->m_fasync, SIGIO, POLL_IN);
+
+            printk(KERN_INFO "globalfifo: %s() kill SIGIO\n", __func__);
+        }
+
         printk(KERN_INFO "globalfifo: globalfifo_write(): write %ld bytes, currentLen: %d\n", count, pGlobalFifoData->m_currentLen);
     }
 
@@ -237,4 +256,12 @@ __poll_t globalfifo_poll(struct file *pFile, struct poll_table_struct *pWait)
 
 
     return mask;
+}
+
+int globalfifo_fasync(int fd, struct file *pFile, int mode)
+{
+    struct LGlobalFifoDataT *pGlobalFifoData = pFile->private_data;
+
+
+    return fasync_helper(fd, pFile, mode, &pGlobalFifoData->m_fasync);
 }

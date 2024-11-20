@@ -23,6 +23,7 @@ struct file_operations globalfifoFops = {
     .write = globalfifo_write,
     .unlocked_ioctl = globalfifo_ioctl,
     .poll = globalfifo_poll,
+    .fasync = globalfifo_fasync,
 };
 
 struct LGlobalFifoDataT globalfifoData = {
@@ -32,4 +33,5 @@ struct LGlobalFifoDataT globalfifoData = {
     .m_devName = "globalfifo",
     .m_mem = {0},
     .m_currentLen = 0,
+    .m_fasync = NULL,
 };

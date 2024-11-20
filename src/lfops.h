@@ -48,9 +48,13 @@ long globalfifo_ioctl(struct file *, unsigned int, unsigned long);
 
 /**
  * @brief 注册 poll() 函数。
- *
  */
 __poll_t globalfifo_poll(struct file *, struct poll_table_struct *);
+
+/**
+ * @brief 注册 fasync() 函数。
+ */
+int globalfifo_fasync(int, struct file *, int);
 
 
 #endif

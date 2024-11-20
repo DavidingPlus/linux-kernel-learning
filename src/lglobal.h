@@ -14,6 +14,7 @@
 #include <linux/ioctl.h>
 #include <linux/mutex.h>
 #include <linux/wait.h>
+#include <linux/fs.h>
 
 
 /**
@@ -76,6 +77,11 @@ struct LGlobalFifoDataT
      * @brief 当前全局内存的有效数据的长度。
      */
     unsigned int m_currentLen;
+
+    /**
+     * @brief 异步结构体指针。
+     */
+    struct fasync_struct *m_fasync;
 };
 
 
