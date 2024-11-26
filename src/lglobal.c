@@ -21,6 +21,7 @@ struct file_operations LSecondFops = {
 };
 
 struct LSecondDataT secondData = {
+    .m_counter = ATOMIC_INIT(0),
     .m_cdev = NULL,
     .m_devNumber = 0,
     .m_devCount = 1,

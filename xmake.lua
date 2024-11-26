@@ -7,3 +7,6 @@ target ("second")
     set_values ("linux.driver.linux-headers", "$(linux-headers)")
 
     add_cflags ("-O1")
+
+
+includes ("snippet")

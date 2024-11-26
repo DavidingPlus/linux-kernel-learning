@@ -13,6 +13,7 @@
 
 #include "lglobal.h"
 #include "lfops.h"
+#include "ltimer.h"
 
 
 MODULE_VERSION("1.0.0");
@@ -56,7 +57,13 @@ static int __init second_init(void)
         return res;
     }
 
-    printk(KERN_INFO "second: second init\n");
+    // 初始化定时器
+    timer_setup(&secondData.m_timer, secondTimerHandler, 0);
+    // 注册定时器
+    secondData.m_timer.expires = jiffies + HZ;
+    add_timer(&secondData.m_timer);
+
+    printk(KERN_INFO "second: second init!\n");
 
 
     return 0;
@@ -64,11 +71,14 @@ static int __init second_init(void)
 
 static void __exit second_exit(void)
 {
+    // 销毁定时器
+    del_timer(&secondData.m_timer);
+
     cdev_del(secondData.m_cdev);
 
     unregister_chrdev_region(secondData.m_devNumber, secondData.m_devCount);
 
-    printk(KERN_INFO "second: second exit\n");
+    printk(KERN_INFO "second: second exit!\n");
 }
 
 

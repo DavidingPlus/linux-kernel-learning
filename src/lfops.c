@@ -9,6 +9,8 @@
 
 #include "lfops.h"
 
+#include "lglobal.h"
+
 
 extern struct LSecondDataT secondData;
 
@@ -35,8 +37,20 @@ int second_release(struct inode *pInode, struct file *pFile)
 
 ssize_t second_read(struct file *pFile, char __user *pBuf, size_t count, loff_t *pOffset)
 {
-    printk(KERN_INFO "second: second_read()\n");
+    struct LSecondDataT *secondData = (struct LSecondDataT *)pFile->private_data;
+
+    int counter = atomic_read(&secondData->m_counter);
+
+    if (put_user(counter, pBuf))
+    {
+        printk(KERN_ALERT "second: put_user() failed\n");
 
 
-    return (ssize_t)0;
+        return -EFAULT;
+    }
+
+    printk(KERN_INFO "second: second_read(): %d\n", counter);
+
+
+    return sizeof(int);
 }

@@ -24,6 +24,11 @@ struct LSecondDataT
     struct timer_list m_timer;
 
     /**
+     * @brief 记录打开设备后经过的秒数。
+     */
+    atomic_t m_counter;
+
+    /**
      * @brief 描述字符设备的 cdev 结构体指针。
      */
     struct cdev *m_cdev;
