@@ -33,7 +33,7 @@ static int __init globalfifo_init(void)
 
     if (res < 0)
     {
-        printk(KERN_ALERT "globalfifo: register_globalfifo_region() failed.\n");
+        printk(KERN_ALERT "globalfifo: alloc_chrdev_region() failed.\n");
 
 
         return res;
