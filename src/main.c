@@ -33,7 +33,7 @@ static int __init globalmem_init(void)
 
     if (res < 0)
     {
-        printk(KERN_ALERT "globalmem: register_globalmem_region() failed.\n");
+        printk(KERN_ALERT "globalmem: alloc_chrdev_region() failed.\n");
 
 
         return res;
