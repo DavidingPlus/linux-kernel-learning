@@ -25,6 +25,7 @@ struct LSecondDataT
 
     /**
      * @brief 记录打开设备后经过的秒数。
+     * @details 为了避免并发和竞态的问题，加上类型简单，直接使用整形原子变量。
      */
     atomic_t m_counter;
 

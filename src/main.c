@@ -58,7 +58,7 @@ static int __init second_init(void)
     }
 
     // 初始化定时器
-    timer_setup(&secondData.m_timer, secondTimerHandler, 0);
+    timer_setup(&secondData.m_timer, timerHandler, 0);
     // 注册定时器
     secondData.m_timer.expires = jiffies + HZ;
     add_timer(&secondData.m_timer);

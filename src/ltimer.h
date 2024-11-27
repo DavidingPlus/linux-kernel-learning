@@ -16,7 +16,7 @@
 /**
  * @brief 定时器的回调函数。
  */
-void secondTimerHandler(struct timer_list *);
+void timerHandler(struct timer_list *);
 
 
 #endif

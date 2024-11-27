@@ -15,11 +15,14 @@
 extern struct LSecondDataT secondData;
 
 
-void secondTimerHandler(struct timer_list *timer)
+void timerHandler(struct timer_list *timer)
 {
     if (timer != &secondData.m_timer)
     {
         printk(KERN_WARNING "second: timer unknown %p", timer);
+
+
+        return;
     }
 
     printk(KERN_INFO "timer: current jiffies is %ld\n", jiffies);

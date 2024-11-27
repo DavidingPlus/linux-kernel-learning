@@ -25,7 +25,6 @@ int second_open(struct inode *pInode, struct file *pFile)
     return 0;
 }
 
-
 int second_release(struct inode *pInode, struct file *pFile)
 {
     printk(KERN_INFO "second: second_release()\n");
@@ -34,11 +33,9 @@ int second_release(struct inode *pInode, struct file *pFile)
     return 0;
 }
 
-
 ssize_t second_read(struct file *pFile, char __user *pBuf, size_t count, loff_t *pOffset)
 {
     struct LSecondDataT *secondData = (struct LSecondDataT *)pFile->private_data;
-
     int counter = atomic_read(&secondData->m_counter);
 
     if (put_user(counter, pBuf))

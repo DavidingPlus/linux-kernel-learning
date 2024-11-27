@@ -6,28 +6,31 @@
 
 int main()
 {
-    int fd;
-    int counter = 0;
-    int old_counter = 0;
-
-    // 打开 /dev/second 设备文件
-    fd = open("/dev/second", O_RDONLY);
-    if (fd != -1)
+    int fd = open("/dev/second", O_RDONLY);
+    if (-1 == fd)
     {
-        while (1)
+        perror("open");
+
+
+        return -1;
+    }
+
+    int counter = 0, oldCounter = 0;
+
+    while (true)
+    {
+        read(fd, &counter, sizeof(int));
+        // 引入 oldCounter 是因为这个死循环是一直读，而非每一秒读一次，因此为了每秒的打印，引入 oldCounter 做比较，当 counter 更新以后才表示过了 1 秒。
+        if (counter != oldCounter)
         {
-            read(fd, &counter, sizeof(unsigned int)); // 读目前经历的秒数
-            if (counter != old_counter)
-            {
-                printf("seconds after open /dev/second: %d\n", counter);
-                old_counter = counter;
-            }
+            std::cout << "seconds after open /dev/second: " << counter << std::endl;
+
+            oldCounter = counter;
         }
     }
-    else
-    {
-        printf("Device open failure\n");
-    }
+
+    close(fd);
+
 
     return 0;
 }
