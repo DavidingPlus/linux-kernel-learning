@@ -5,11 +5,11 @@ local dirs = os.dirs("*")
 for _, dir in ipairs (dirs) do
     local xmakeFile = path.join(dir, "xmake.lua")
     local buildmeFile = path.join(dir, ".buildme")
-    
+
     if os.isdir(dir) and os.isfile(xmakeFile) and os.isfile(buildmeFile) then
         -- Add subdirectory as a sub-project in xmake
         includes (dir)
-    
+
     end
 
 end
