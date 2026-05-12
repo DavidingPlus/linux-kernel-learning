@@ -1,6 +1,6 @@
 ifneq ($(KERNELRELEASE),)
 
-hello-objs := main.o list.c
+hello-objs := main.o list.o
 obj-m := hello.o
 
 
