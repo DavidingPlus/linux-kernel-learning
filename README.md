@@ -1,4 +1,4 @@
-# linux-kernel-learning
+# school-course
 
-Linux 内核的学习。
+校内专业课实验部分的代码。
 
