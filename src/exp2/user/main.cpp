@@ -1,0 +1,74 @@
+#include <iostream>
+#include <unistd.h>
+#include <chrono>
+
+#define __NR_mycall 451
+#define LOOP_COUNT 100000
+
+
+long userCompute(int op, int num1, int num2, int loopCount)
+{
+    long res = 0;
+
+    for (int i = 0; i < loopCount; ++i)
+    {
+        switch (op)
+        {
+            case '+':
+                res += (num1 + num2) + i;
+                break;
+            case '-':
+                res += (num1 - num2) + i;
+                break;
+            case '*':
+                res += (num1 * num2) + i;
+                break;
+            case '/':
+                res += (num1 / num2) + i;
+                break;
+        }
+    }
+
+
+    return res;
+}
+
+long kernelCompute(int op, int num1, int num2, int loopCount)
+{
+    return syscall(__NR_mycall, op, num1, num2, loopCount);
+}
+
+
+template <typename Func, typename... Args>
+auto timeFunc(Func f, Args &&...args)
+{
+    auto start = std::chrono::high_resolution_clock::now();
+    auto res = f(std::forward<Args>(args)...);
+    auto end = std::chrono::high_resolution_clock::now();
+
+    auto timeUs = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+
+
+    return std::make_pair(res, timeUs);
+}
+
+
+int main()
+{
+    int num1 = 123, num2 = 456;
+
+    // 用户态测试。
+    auto [userRes, userTime] = timeFunc(userCompute, '+', num1, num2, LOOP_COUNT);
+
+    std::cout << "User result: " << userRes << std::endl;
+    std::cout << "User time: " << userTime << " us" << std::endl;
+
+    // 内核态测试。
+    auto [kernelRes, kernelTime] = timeFunc(kernelCompute, '+', num1, num2, LOOP_COUNT);
+
+    std::cout << "Kernel result: " << kernelRes << std::endl;
+    std::cout << "Kernel time: " << kernelTime << " us" << std::endl;
+
+
+    return 0;
+}

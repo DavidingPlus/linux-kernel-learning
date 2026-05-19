@@ -7,3 +7,10 @@ target ("hello")
     set_values ("linux.driver.linux-headers", "$(linux-headers)")
 
     add_cflags ("-O1")
+
+target ("mycall")
+    set_kind ("binary")
+    add_files ("src/exp2/user/*.cpp")
+    set_languages ("cxx17")
+
+    add_cflags ("-O1")
