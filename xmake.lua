@@ -6,11 +6,11 @@ target ("hello")
     add_files ("src/exp1/*.c")
     set_values ("linux.driver.linux-headers", "$(linux-headers)")
 
-    add_cflags ("-O1")
+    set_optimize("fast")
 
 target ("mycall")
     set_kind ("binary")
     add_files ("src/exp2/user/*.c")
     set_languages ("c17")
 
-    add_cflags ("-O0")
+    set_optimize("none") -- none, fast, faster, fastest, smallest, aggressive
