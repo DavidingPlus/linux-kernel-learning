@@ -1,6 +1,8 @@
 #include <iostream>
-#include <unistd.h>
 #include <chrono>
+
+#include <unistd.h>
+
 
 #define __NR_mycall 451
 #define LOOP_COUNT 100000
@@ -8,29 +10,29 @@
 
 long userCompute(int op, int num1, int num2, int loopCount)
 {
-    long res = 0;
+    volatile long result = 0;
 
     for (int i = 0; i < loopCount; ++i)
     {
         switch (op)
         {
             case '+':
-                res += (num1 + num2) + i;
+                result += (num1 + num2) + i;
                 break;
             case '-':
-                res += (num1 - num2) + i;
+                result += (num1 - num2) + i;
                 break;
             case '*':
-                res += (num1 * num2) + i;
+                result += (num1 * num2) + i;
                 break;
             case '/':
-                res += (num1 / num2) + i;
+                result += (num1 / num2) + i;
                 break;
         }
     }
 
 
-    return res;
+    return result;
 }
 
 long kernelCompute(int op, int num1, int num2, int loopCount)
