@@ -17,7 +17,7 @@ module_param(helloInitParam, charp, S_IRUGO);
 static LIST_HEAD(HelloListNodeHead);
 
 
-static int __init hello_init(void)
+static int __init exp1_init(void)
 {
     printk(KERN_INFO "hello: Hello World %s\n", helloInitParam);
 
@@ -39,7 +39,7 @@ static int __init hello_init(void)
     return 0;
 }
 
-static void __exit hello_exit(void)
+static void __exit exp1_exit(void)
 {
     freeList(&HelloListNodeHead);
 
@@ -47,5 +47,5 @@ static void __exit hello_exit(void)
 }
 
 
-module_init(hello_init);
-module_exit(hello_exit);
+module_init(exp1_init);
+module_exit(exp1_exit);
